@@ -48,24 +48,7 @@ public class PiDigits {
     }
 
 
-    public static byte[] getSomeDigits (int start, int end, byte[] digits){
-        double sum = 0;
-        for (int i = 0; i < end; i++) {
-            if (i % DigitsPerSum == 0) {
-                sum = 4 * sum(1, start)
-                        - 2 * sum(4, start)
-                        - sum(5, start)
-                        - sum(6, start);
 
-                start += DigitsPerSum;
-            }
-
-            sum = 16 * (sum - Math.floor(sum));
-            digits[i] = (byte) sum;
-        }
-        return digits;
-
-    }
     /// <summary>
     /// Returns the sum of 16^(n - k)/(8 * k + m) from 0 to k.
     /// </summary>

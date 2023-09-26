@@ -16,27 +16,27 @@ import java.util.Scanner;
 public class Main {
 
     public static void main(String a[]) {
-        System.out.println(bytesToHex(PiDigits.getDigits(6, 1000))); //Para probar
-        int n = 2;                      // Número de Hilos
-        int start = 6;                  // Posición desde conde se desean calcular una cantidad digitos
-        int count = 30000;               //
-        int lastCount;
-        int interval = count/n;
-        Object lock = new Object();
+        System.out.println(bytesToHex(PiDigits.getDigits(1, 100))); //Para probar
+        int n = 5;                       // Número de Hilos
+        int start = 1;                   // Posición desde donde se desean calcular una cantidad de digitos determinada
+        int count = 100;                // Cantidad de dígitos que se desean calcular
+        int lastCount;                   // Número de dígitos que va a calcular el último hilo que se cree
+        int interval = count/n;          // Cantidad de dígitos que van a calcular todos los hilos
+        Object lock = new Object();      // Lock o monitor para que los hilos se detengan por su cuenta cada cinco segundos
 
-        int startAt;
+        int startAt;                     // Posicion desde la que cada hilo empezará a buscar dígitos
 
-        ArrayList<PiThread> threads = new ArrayList<PiThread>();
-        for (int i = 0; i < n; i++) {
-
-            if (start > 0) {
+        ArrayList<PiThread> threads = new ArrayList<PiThread>();      // Lista de hilos para posteriormente concatenar resultados
+        for (int i = 0; i < n; i++) {                          // Ciclo para a creación de hilos, teniendo en cuenta si se desea empezar la
+                                                               // búsqueda de dígitos desde un valor igual o mayor a cero, para saber con exactitud el valor inicial
+            if (start > 0) {                                   // que se le enviará a cada hilo
                 startAt = start + interval*i;
 
             } else {
                 startAt = i*interval;
             }
 
-            if(i == n-1){
+            if(i == n-1){                                       // Al último hilo se le envía el número restante de dígitos a calcular
                 lastCount = count + start - startAt;
                 threads.add(new PiThread(startAt, lastCount, lock));
 
@@ -45,13 +45,13 @@ public class Main {
             }
         }
 
-        for (Thread thread : threads){
+        for (Thread thread : threads){                           // Se inicia la ejecución de los hilos
             thread.start();
         }
 
         boolean stop = false;
-        while(!stop) {
-            try {
+        while(!stop) {                                           // El ciclo while finaliza cuando los hilos hayan finalizado su ejecución
+            try {                                                // de lo contrario, cada cinco segundos se muestra en pantalla el avance de cada hilo
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
@@ -64,7 +64,7 @@ public class Main {
                 String enterString = enter.nextLine();
                 if (!enterString.equals("")) {
                     stop = true;
-                } else {
+                } else {                                           // Si el usuario da enter, se continúa con la búsqueda de los dígitos
                     synchronized (lock) {
                         lock.notifyAll();
                     }
@@ -74,8 +74,8 @@ public class Main {
 
         for (PiThread piThread : threads){
             try {
-                piThread.join();
-                System.out.print(bytesToHex(piThread.getDigits()));
+                piThread.join();                                    // Se espera a que termine cada hilo
+                System.out.print(piThread.getHexaDigits());         // Imprimiendo en una sola línea ordenada, los dígitos que cada uno buscó
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
