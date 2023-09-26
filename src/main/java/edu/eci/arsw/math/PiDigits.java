@@ -8,8 +8,8 @@ package edu.eci.arsw.math;
 ///  </summary>
 public class PiDigits {
 
-    private static int DigitsPerSum = 8;
-    private static double Epsilon = 1e-17;
+    public static int DigitsPerSum = 8;
+    public static double Epsilon = 1e-17;
 
     
     /**
@@ -48,9 +48,9 @@ public class PiDigits {
     }
 
 
-    public static byte[] getSomeDigits (int start, int startAt, int end, byte[] digits){
+    public static byte[] getSomeDigits (int start, int end, byte[] digits){
         double sum = 0;
-        for (int i = startAt; i < end; i++) {
+        for (int i = 0; i < end; i++) {
             if (i % DigitsPerSum == 0) {
                 sum = 4 * sum(1, start)
                         - 2 * sum(4, start)
@@ -72,7 +72,7 @@ public class PiDigits {
     /// <param name="m"></param>
     /// <param name="n"></param>
     /// <returns></returns>
-    private static double sum(int m, int n) {
+    public static double sum(int m, int n) {
         double sum = 0;
         int d = m;
         int power = n;

@@ -7,6 +7,7 @@ package edu.eci.arsw.math;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Scanner;
 
 /**
  *
@@ -15,34 +16,72 @@ import java.util.Arrays;
 public class Main {
 
     public static void main(String a[]) {
-        //System.out.println(bytesToHex(PiDigits.getDigits(0, 10)));
-        int n = 5;
-        int start = 0;
-        int count = 10;
-        double interval = (double)((count-start)/n);
-        int intervalInt = (int) interval;
-        if (interval - intervalInt >= 0.4) {
-            intervalInt++;
-        }
-        int startAt = 1;
-        int endAt = 1 + intervalInt;
-        ArrayList<Thread> threads = new ArrayList<Thread>();
+        System.out.println(bytesToHex(PiDigits.getDigits(6, 1000))); //Para probar
+        int n = 2;                      // Número de Hilos
+        int start = 6;                  // Posición desde conde se desean calcular una cantidad digitos
+        int count = 30000;               //
+        int lastCount;
+        int interval = count/n;
+        Object lock = new Object();
+
+        int startAt;
+
+        ArrayList<PiThread> threads = new ArrayList<PiThread>();
         for (int i = 0; i < n; i++) {
-            if(i == n-1){
-                //
-                threads.add(new PiThread(startAt, count));
+
+            if (start > 0) {
+                startAt = start + interval*i;
+
             } else {
-                threads.add(new PiThread(startAt, endAt));
+                startAt = i*interval;
             }
-            startAt +=  intervalInt;
-            endAt += intervalInt;
+
+            if(i == n-1){
+                lastCount = count + start - startAt;
+                threads.add(new PiThread(startAt, lastCount, lock));
+
+            } else {
+                threads.add(new PiThread(startAt, interval, lock));
+            }
         }
 
         for (Thread thread : threads){
             thread.start();
         }
 
+        boolean stop = false;
+        while(!stop) {
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            if (Thread.activeCount() == 2) {
+                stop = true;
+            } else {
+                Scanner enter = new Scanner(System.in);
+                System.out.println("Presione la tecla Enter para continuar calculando los dígitos.");
+                String enterString = enter.nextLine();
+                if (!enterString.equals("")) {
+                    stop = true;
+                } else {
+                    synchronized (lock) {
+                        lock.notifyAll();
+                    }
+                }
+            }
+        }
 
+        for (PiThread piThread : threads){
+            try {
+                piThread.join();
+                System.out.print(bytesToHex(piThread.getDigits()));
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        //System.out.println(bytesToHex(PiDigits.getDigits(1, 10)));
         //System.out.println(bytesToHex(PiDigits.getDigits(1, 100)));
         //System.out.println(bytesToHex(PiDigits.getDigits(1, 1000000)));
     }
